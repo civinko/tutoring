@@ -32,8 +32,7 @@ while True:
 
     replay = input("Play again?(yes or no): ").lower()
     if replay == "yes":
-        player_total = 0
-        bot_total = 0
+        pass
     else:
         break
 
