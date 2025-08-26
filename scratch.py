@@ -18,7 +18,7 @@ while player_total < 2 and bot_total < 2:
             (player == "scissors" and bot == "paper"):
         print("You win!")
         player_total += 1
-    elif player != "rock" or "paper" or "scissors":
+    elif player not in options:
         print("Write in a correct option.")
     else:
         print("You lose.")
