@@ -31,8 +31,8 @@ else:
 
 replay = input("Play again?(yes or no): ").lower()
 if replay == "yes":
-    player_total = True
-    bot_total = True
+    player_total = 0
+    bot_total = 0
 
     #let's add tie tracking (done)
 #when printing, print result + amount of ties (done)
