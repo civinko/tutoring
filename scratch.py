@@ -36,7 +36,3 @@ while True:
     else:
         break
 
-    #let's add tie tracking (done)
-#when printing, print result + amount of ties (done)
-#error handling (probably done)
-#!!! maybe add replay !!!
