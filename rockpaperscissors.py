@@ -8,7 +8,9 @@ while True:
             "paper",
             "scissors"]
     while player_total < 2 and bot_total < 2:
-        player = input("Rock, paper, scissors: ").lower()
+        player = input("Rock, paper, scissors(or quit): ").lower()
+        if player == "quit":
+            exit()
         bot = random.choice(options)
         print("Bot: ", bot)
         if player == bot:
