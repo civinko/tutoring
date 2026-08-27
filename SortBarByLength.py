@@ -37,3 +37,13 @@
 # - The list contains at least one string.
 # - Each string contains only the character "I".
 # - Do not modify the contents of the strings.
+
+def sortBars(bars):
+    bars = bars[:]  # make a copy
+
+    for i in range(len(bars)):
+        for j in range(len(bars) - 1 - i):
+            if len(bars[j]) > len(bars[j + 1]):
+                bars[j], bars[j + 1] = bars[j + 1], bars[j]
+
+    return bars
