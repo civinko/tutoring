@@ -39,7 +39,7 @@
 # - Do not modify the contents of the strings.
 
 def sortBars(bars):
-    bars = bars[:]  # make a copy
+    bars = bars[:]
 
     for i in range(len(bars)):
         for j in range(len(bars) - 1 - i):
@@ -47,3 +47,15 @@ def sortBars(bars):
                 bars[j], bars[j + 1] = bars[j + 1], bars[j]
 
     return bars
+
+
+bars = [
+    "IIII",
+    "III",
+    "IIIIII",
+    "IIII",
+    "IIIIIIIII",
+    "II"
+]
+
+print(sortBars(bars))
