@@ -290,7 +290,13 @@ def display_menu():
     # TODO:
     # Student will implement this function.
 
-    pass
+    print("\n-------- MENU --------")
+    print("ID  |  Name  |  Price")
+    for item_id, item in menu.items():
+
+        print(f"{item_id} | {item['name']} | ${item['price']:.2f}")
+
+    input("Press Enter to return to the main menu...")
 
 
 # ============================================================
