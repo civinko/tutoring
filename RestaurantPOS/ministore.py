@@ -341,8 +341,28 @@ def add_item(order):
     # TODO:
     # Student will implement this function.
 
-    pass
+    item_id = input("Enter the item ID to add: ")
 
+    if item_id not in menu:
+        print("Item ID does not exist.")
+        input("\nPress Enter to continue...")
+        return
+
+    quantity = int(input("Enter quantity: "))
+
+    if quantity <= 0:
+        print("Quantity must be greater than 0.")
+        input("\nPress Enter to continue...")
+        return
+
+    if item_id in order:
+        order[item_id] += quantity
+    else:
+        order[item_id] = quantity
+
+    print(f"Added {quantity} of {menu[item_id]['name']} to the order.")
+
+    input("\nPress Enter to continue...")
 
 # ============================================================
 # REMOVE ITEM
