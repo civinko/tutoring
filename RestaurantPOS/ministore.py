@@ -240,22 +240,30 @@ menu = {
 # This would allow multiple tables/orders to exist at once.
 
 
-current_order = {
+active_orders = {
+    1: {
+        "order_number": 1,
+        "order_type": "dine-in",
+        "table_number": None,
+        "items": {},
+        "special_instructions": "",
+        "status": "active"
+    }
 
-    "order_number": 1,
-
-    "order_type": "dine-in",
-
-    "table_number": None,
-
-    "items": {},
-
-    "special_instructions": "",
-
-    "status": "open"
 }
 
-
+def create_order(active_orders):
+    order_number = len(active_orders) + 1
+    active_orders[order_number] = {
+        "order_number": order_number,
+        "order_type": "dine-in",
+        "table_number": None,
+        "items": {},
+        "special_instructions": "",
+        "status": "active"
+    }
+    print(f"Order #{order_number} created. ")
+    return order_number
 # ============================================================
 # DISPLAY MENU
 # ============================================================
@@ -304,39 +312,7 @@ def display_menu():
 # ============================================================
 
 def add_item(order):
-    """
-    Add a menu item to an order.
 
-    REQUIREMENTS:
-
-    1. Ask user for an item ID.
-
-    2. Check whether the item exists.
-
-    3. Check whether the item is available.
-
-    4. Ask for quantity.
-
-    5. Quantity must be greater than 0.
-
-    6. Add the item to order["items"].
-
-    Example order:
-
-    {
-        "101": {
-            "name": "Classic Burger",
-            "price": 10.99,
-            "quantity": 2
-        }
-    }
-
-    IMPORTANT:
-
-    If the item already exists in the order,
-    increase its quantity instead of creating
-    another copy.
-    """
 
     # TODO:
     # Student will implement this function.
@@ -355,12 +331,13 @@ def add_item(order):
         input("\nPress Enter to continue...")
         return
 
-    if item_id in order:
-        order[item_id] += quantity
+    if item_id in order["items"]:
+        order["items"][item_id] += quantity
     else:
-        order[item_id] = quantity
+        order["items"][item_id] = quantity
 
-    print(f"Added {quantity} of {menu[item_id]['name']} to the order.")
+    print(f"Added {quantity} of "
+           f"{menu[item_id]['name']} to the order #{order['order_number']}.")
 
     input("\nPress Enter to continue...")
 
@@ -569,10 +546,28 @@ def checkout(order):
 
     pass
 
+def view_active_orders(active_orders):
+    if len(active_orders) == 0:
+        print("No active orders.")
+        input("\nPress Enter to continue...")
+        return
+
+    print("\n-------- ACTIVE ORDERS --------")
+    for order_number, order in active_orders.items():
+        print(
+            f"Order #{order_number} | "
+            f"Type: {order['order_type']} | "
+            f"Table: {order['table_number']} | "
+            f"Items: {len(order['items'])} | "
+            f"Status: {order['status']}"
+        )
+
+        input("\nPress Enter to continue...")
 
 # ============================================================
 # PRINT RECEIPT
 # ============================================================
+
 
 def print_receipt(order, subtotal, tax, total, payment, change):
     """
@@ -613,6 +608,22 @@ def print_receipt(order, subtotal, tax, total, payment, change):
 
     pass
 
+def select_order(active_orders):
+
+    try:
+        order_number = int(input("Enter order number to open: "))
+
+    except ValueError:
+        print("Invalid input. Please enter a valid order number.")
+        input("\nPress Enter to continue...")
+        return None
+
+    if order_number not in active_orders:
+        print(f"Order #{order_number} does not exist.")
+        input("\nPress Enter to continue...")
+        return None
+
+    return order_number
 
 # ============================================================
 # CLEAR ORDER
@@ -637,45 +648,64 @@ def clear_order(order):
     order["items"].clear()
 
 
+def order_menu(order):
+    while True:
+
+        print()
+        print("=" * 45)
+        print(f"ORDER #{order['order_number']} MENU")
+        print("=" * 45)
+
+        print("1. View Order")
+        print("2. Add Item")
+        print("3. Remove Item")
+        print("4. Checkout")
+        print("5. Return to Main Menu")
+        print("6. Clear Order")
+
+        print("=" * 45)
+
+        choice = input("Choose an option: ")
+
+        if choice == "1":
+            view_order(order)
+
+        elif choice == "2":
+            add_item(order)
+
+        elif choice == "3":
+            remove_item(order)
+
+        elif choice == "4":
+            checkout(order)
+            break
+
+        elif choice == "5":
+            break
+
+        elif choice == "6":
+            clear_order(order)
+            print(f"Order #{order['order_number']} has been cleared.")
+
+        else:
+            print("Invalid option. Please try again.")
 # ============================================================
 # MAIN POS SCREEN
 # ============================================================
 
-def display_pos_options():
-    """
-    Display the main POS options.
-
-    Example:
-
-    ==========================================
-                 PYTHON BISTRO POS
-    ==========================================
-
-    1. View Menu
-    2. Add Item
-    3. Remove Item
-    4. View Current Order
-    5. Checkout
-    6. Cancel Order
-    7. Exit
-
-    ==========================================
-    """
+def display_order_options():
 
     print()
-    print("=" * 40)
+    print("=" * 45)
     print(f"{RESTAURANT_NAME} POS")
-    print("=" * 40)
+    print("=" * 45)
 
-    print("1. View Menu")
-    print("2. Add Item")
-    print("3. Remove Item")
-    print("4. View Current Order")
-    print("5. Checkout")
-    print("6. Cancel Order")
-    print("7. Exit")
+    print("1. Create New Order")
+    print("2. View Active Orders")
+    print("3. Open Order")
+    print("4. Exit")
 
-    print("=" * 40)
+    print("=" * 45)
 
 
 # ============================================================
@@ -683,76 +713,32 @@ def display_pos_options():
 # ============================================================
 
 def main():
-    """
-    Main POS program.
-
-    The main function controls the application.
-
-    IMPORTANT DESIGN RULE:
-
-    main() should mostly decide WHAT function should run.
-
-    It should NOT contain all of the restaurant logic itself.
-
-    BAD:
-
-        if choice == "2":
-            # 40 lines of code for adding an item
-
-    BETTER:
-
-        if choice == "2":
-            add_item(current_order)
-
-    Keeping functions separated makes the program easier to:
-
-    - read
-    - debug
-    - test
-    - expand
-    """
 
     while True:
 
-        display_pos_options()
+        display_order_options()
 
         choice = input("Choose an option: ")
 
         if choice == "1":
 
-            display_menu()
+            create_order(active_orders)
 
         elif choice == "2":
 
-            add_item(current_order)
+            view_active_orders(active_orders)
 
         elif choice == "3":
 
-            remove_item(current_order)
+            order_number = select_order(active_orders)
+
+            if order_number is not None:
+
+                order_menu(active_orders[order_number])
 
         elif choice == "4":
 
-            view_order(current_order)
-
-        elif choice == "5":
-
-            checkout(current_order)
-
-        elif choice == "6":
-
-            confirm = input(
-                "Are you sure you want to cancel this order? (y/n): "
-            )
-
-            if confirm.lower() == "y":
-                clear_order(current_order)
-
-                print("Order cancelled.")
-
-        elif choice == "7":
-
             print("Closing POS system...")
-
             break
 
         else:
