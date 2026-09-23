@@ -259,6 +259,7 @@ def create_order(active_orders):
         "order_type": "dine-in",
         "table_number": None,
         "items": {},
+        "voided_items": [],
         "special_instructions": "",
         "status": "active"
     }
@@ -379,27 +380,87 @@ def remove_item(order):
     delete the item completely from the order.
     """
 
-    # TODO
+    if len(order["items"]) == 0:
+        print("Order is empty. Nothing to remove.")
+        input("\nPress Enter to continue...")
+        return
 
-    pass
+    view_order(order)
+
+    item_id = input("Enter the item ID to void: ")
+
+    if item_id not in order["items"]:
+        print("Item is not in the order.")
+        input("\nPress Enter to continue...")
+        return
+
+    try:
+        quantity_to_remove = int(input("Enter quantity to void: "))
+
+    except ValueError:
+        print("Invalid input. Please enter a valid quantity.")
+        return
+
+    if quantity_to_remove <= 0:
+        print("Quantity must be greater than 0.")
+        return
+
+    current_quantity = order["items"][item_id]
+
+    if quantity_to_remove > current_quantity:
+        print("Quantity to remove exceeds available quantity.")
+        input("\nPress Enter to continue...")
+        return
+
+    reason = choose_void_reason()
+
+    void_record = {
+        "item_id": item_id,
+        "name": menu[item_id]["name"],
+        "price": menu[item_id]["price"],
+        "quantity": quantity_to_remove,
+        "reason": reason
+    }
+
+    order["voided_items"].append(void_record)
 
 
+    if order["items"][item_id] == 0:
+        del order["items"][item_id]
+
+    print(f"Voided {quantity_to_remove} of {menu[item_id]['name']} for reason: {reason}.")
+    input("\nPress Enter to continue...")
+
+def choose_void_reason():
+    """
+    Prompt the user to select a reason for voiding an item.
+
+    Returns:
+        str: The selected void reason.
+    """
+
+    print("\nSelect a reason for voiding the item:")
+    print("1. Customer changed mind")
+    print("2. Item unavailable")
+    print("3. Incorrect order")
+    print("4. Other")
+
+    choice = input("Enter the number corresponding to the reason: ")
+
+    reasons = {
+        "1": "Customer changed mind",
+        "2": "Item unavailable",
+        "3": "Incorrect order",
+        "4": "Other"
+    }
+
+    return reasons.get(choice, "Other")
 # ============================================================
 # VIEW ORDER
 # ============================================================
 
 def view_order(order):
     """
-    Display everything currently in the order.
-
-    REQUIREMENTS:
-
-    Display:
-
-    - Item name
-    - Quantity
-    - Price per item
-    - Total price for that item
 
     EXAMPLE:
 
@@ -417,9 +478,31 @@ def view_order(order):
     Subtotal: $25.97
     """
 
-    # TODO
+    if len(order["items"]) == 0:
+        print("Order is empty.")
+        input("\nPress Enter to continue...")
+        return
 
-    pass
+    print()
+    print("=" * 45)
+    print(f"ORDER #{order['order_number']} DETAILS")
+    print("=" * 45)
+
+    subtotal = 0
+
+    for item_id, quantity in order["items"].items():
+        item = menu[item_id]
+        item_name = item["name"]
+        item_price = item["price"]
+        total_price = item_price * quantity
+
+        print(f"{item_name}")
+        print(f"${item_price:.2f} x {quantity} = ${total_price:.2f}")
+        print("-" * 45)
+        subtotal += total_price
+
+    print(f"Subtotal: ${subtotal:.2f}")
+    input("\nPress Enter to continue...")
 
 
 # ============================================================
@@ -562,8 +645,8 @@ def view_active_orders(active_orders):
             f"Status: {order['status']}"
         )
 
-        input("\nPress Enter to continue...")
-
+    print("=" * 45)
+    input("Press Enter to return to the main menu...")
 # ============================================================
 # PRINT RECEIPT
 # ============================================================
@@ -656,20 +739,20 @@ def order_menu(order):
         print(f"ORDER #{order['order_number']} MENU")
         print("=" * 45)
 
-        print("1. View Order")
+        print("1. View Menu")
         print("2. Add Item")
         print("3. Remove Item")
-        print("4. Checkout")
-        print("5. Return to Main Menu")
-        print("6. Clear Order")
+        print("4. View Current Order")
+        print("5. Checkout")
+        print("6. Cancel Order")
+        print("7. Return to Main Menu")
 
         print("=" * 45)
 
         choice = input("Choose an option: ")
 
         if choice == "1":
-            view_order(order)
-
+            display_menu()
         elif choice == "2":
             add_item(order)
 
@@ -677,16 +760,21 @@ def order_menu(order):
             remove_item(order)
 
         elif choice == "4":
-            checkout(order)
-            break
+            view_order(order)
 
         elif choice == "5":
-            break
+            checkout(order)
 
         elif choice == "6":
-            clear_order(order)
-            print(f"Order #{order['order_number']} has been cleared.")
-
+            confirm = input("Are you sure you want to cancel this order? (y/n): ")
+            if confirm.lower() == "y":
+                clear_order(order)
+                order["status"] = "cancelled"
+                print(f"Order #{order['order_number']} has been cancelled.")
+                input("\nPress Enter to return to the main menu...")
+                break
+        elif choice == "7":
+            break
         else:
             print("Invalid option. Please try again.")
 # ============================================================
